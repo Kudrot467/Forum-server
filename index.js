@@ -29,9 +29,25 @@ async function run() {
     await client.connect();
 
     const usersCollection= client.db('forumDB').collection('users');
+    const postsCollection=client.db('forumDB').collection('posts');
 
 
+    app.get('/posts',async(req,res)=>{
+        let query={};
+        if(req.query?.email){
+            query={email: req.query.email}
+        }
+        const cursor=postsCollection.find(query);
+        const result=await cursor.toArray();
+        res.send(result);
 
+    })
+
+    app.post('/posts',async(req,res)=>{
+        const post=req.body;
+        const result=await postsCollection.insertOne(post);
+        res.send(result);
+    })
 
     app.get('/users',async(req,res)=>{
         let query={};
@@ -45,6 +61,12 @@ async function run() {
 
     app.post('/users', async (req, res) => {
         const user = req.body;
+        const query={email: user.email}
+        const existingUser=await usersCollection.findOne(query);
+        if(existingUser)
+        {
+            res.send({message:'user already exists', insertedId:null})
+        }
         const result = await usersCollection.insertOne(user);
        console.log(result);
         res.send(result);
