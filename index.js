@@ -175,7 +175,7 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users',async(req,res)=>{
+    app.get('/users',verifyToken,verifyAdmin,async(req,res)=>{
      
         let query={};
         if(req.query?.email){
@@ -186,7 +186,7 @@ async function run() {
         res.send(result);
     });
 
-    app.post('/users',verifyToken,verifyAdmin, async (req, res) => {
+    app.post('/users', async (req, res) => {
         const user = req.body;
         const query={email: user.email}
         const existingUser=await usersCollection.findOne(query);
