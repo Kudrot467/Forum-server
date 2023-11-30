@@ -31,6 +31,8 @@ async function run() {
 
     const usersCollection= client.db('forumDB').collection('users');
     const postsCollection=client.db('forumDB').collection('posts');
+    const tagsCollection=client.db('forumDB').collection('tags');
+    const commentsCollection=client.db('forumDB').collection('comments');
     const announcementsCollection=client.db('forumDB').collection('announcements');
 
     app.post('/jwt',async(req,res)=>{
@@ -70,7 +72,9 @@ async function run() {
     }
 
 
-    app.get('/users/admin/:email',verifyAdmin,verifyToken,async(req,res)=>{
+
+
+    app.get('/users/admin/:email',verifyToken,async(req,res)=>{
         const email=req.params.email;
         if(email !== req.decoded.email)
         {
@@ -86,7 +90,31 @@ async function run() {
         res.send({admin});
     })
 
-    
+
+    app.get('/comments',async(req,res)=>{
+      const cursor=commentsCollection.find();
+      const result=await cursor.toArray();
+      res.send(result);
+    })
+
+    app.post('/comments',async(req,res)=>{
+      const comment=req.body;
+      const result=await commentsCollection.insertOne(comment);
+      res.send(result);
+    })
+
+    app.get('/tags',async(req,res)=>{
+      const cursor=tagsCollection.find();
+      const result=await cursor.toArray();
+      res.send(result);
+    })
+
+    app.post('/tags',async(req,res)=>{
+      const tag=req.body;
+      const result=await tagsCollection.insertOne(tag);
+      res.send(result);
+  })
+
 
     app.get('/makeAnnouncements',async(req,res)=>{
       let query={};
@@ -101,6 +129,14 @@ async function run() {
     app.post('/makeAnnouncements',async(req,res)=>{
       const announcement=req.body;
       const result=await announcementsCollection.insertOne(announcement);
+      res.send(result);
+    })
+
+
+    app.delete('/posts/:id',async(req,res)=>{
+      const id=req.params.id;
+      const query={_id: new ObjectId(id)}
+      const result=postsCollection.deleteOne(query)
       res.send(result);
     })
 
@@ -139,7 +175,7 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users',verifyToken,verifyAdmin,async(req,res)=>{
+    app.get('/users',async(req,res)=>{
      
         let query={};
         if(req.query?.email){
