@@ -175,7 +175,7 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/users',verifyToken,verifyAdmin,async(req,res)=>{
+    app.get('/users',async(req,res)=>{
      
         let query={};
         if(req.query?.email){
